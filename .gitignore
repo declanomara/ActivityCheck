@@ -1,0 +1,4 @@
+.venv/
+*.pem
+credentials.json
+seen.txt
