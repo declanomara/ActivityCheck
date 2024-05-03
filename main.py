@@ -84,8 +84,11 @@ def handle_comment(comment):
     user = parent.author
 
     # Find the first activity on the subreddit by the user
-    comments = user.comments.new()
-    submissions = user.submissions.new()
+    comments = list(user.comments.new(limit = 1000))
+    submissions = list(user.submissions.new(limit = 1000))
+
+    comments_scanned = len(comments)
+    submissions_scanned = len(submissions)
 
     sub = comment.subreddit
 
@@ -95,14 +98,18 @@ def handle_comment(comment):
 
     first_activity = min(comments + submissions, key = lambda x: x.created_utc)
 
-    time_elapsed = comment.created_utc - first_activity.created_utc
-
-    activity_per_day = (len(comments) + len(submissions)) / (time_elapsed / (60 * 60 * 24))
+    # Calculate the activity per day
+    week_ago = comment.created_utc - (60 * 60 * 24 * 7)
+    recent_comments = [c for c in comments if c.created_utc > week_ago]
+    activity_per_day = len(recent_comments) / 7
 
     # Reply to the comment
     message = f"{user.name} was first active in r/{sub.display_name} no later than {utc_to_human_readable(first_activity.created_utc)} [here](https://reddit.com{first_activity.permalink})." \
-              "\n\n_Note: Due to Reddit API limitations, the earliest activity seen by the bot might not be the actual earliest activity, but it provides an upper bound._"
+              f" In the past week, they have been active at a rate of {activity_per_day:.2f} comments per day." \
+              f"\n\n_Note: Due to Reddit API limitations, the earliest activity seen by the bot might not be the actual earliest activity, but it provides an upper bound. Furthermore, the bot will underestimate comment activity for users who have made >1000 comments across Reddit in the past week. For this user, the bot scanned {comments_scanned} comments and {submissions_scanned} submissions._"
     comment.reply(message)
+    print(message)
+    print('-'*50)
 
     print(f"Replied to {comment.author.name} (reddit.com{comment.permalink})")
 
@@ -110,10 +117,11 @@ def handle_comment(comment):
 if __name__ == "__main__":
     seen = load_seen()
     reddit = get_reddit()
+    subreddit = "ucla"
     prompt = "!activitycheck"
 
     try:
-        listen_for_prompt(reddit, prompt, handle_comment, subreddit = "ucla")
+        listen_for_prompt(reddit, prompt, handle_comment, subreddit)
     except KeyboardInterrupt:
         save_seen(seen)
         print("Exiting...")
