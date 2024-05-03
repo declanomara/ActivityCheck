@@ -142,8 +142,7 @@ if __name__ == "__main__":
         exit()
     
     except Exception as e:
-        print(e)
         save_seen(seen)
-        exit()
+        raise
 
     
