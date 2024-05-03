@@ -101,7 +101,6 @@ def handle_comment(comment):
 
     # Reply to the comment
     message = f"{user.name} was first active in r/{sub.display_name} no later than {utc_to_human_readable(first_activity.created_utc)} [here](https://reddit.com{first_activity.permalink})." \
-              f"Since then, they have made {len(comments)} comments and {len(submissions)} submissions. They have made an average of {activity_per_day:0.2f} comments and submissions per day since the earliest identified activity." \
               "\n\n_Note: Due to Reddit API limitations, the earliest activity seen by the bot might not be the actual earliest activity, but it provides an upper bound._"
     comment.reply(message)
 
