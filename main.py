@@ -76,16 +76,18 @@ def handle_comment(comment):
 
     if comment.id in seen:
         return
-    else:
-        seen.add(comment.id)
 
     # Get the user the prompt was directed at
     parent = comment.parent()
     user = parent.author
 
     # Find the first activity on the subreddit by the user
-    comments = list(user.comments.new(limit = 1000))
-    submissions = list(user.submissions.new(limit = 1000))
+    try:
+        comments = list(user.comments.new(limit = 1000))
+        submissions = list(user.submissions.new(limit = 1000))
+
+    except Exception as e:
+        print(f"Error while fetching comments and submissions: {e}")
 
     comments_scanned = len(comments)
     submissions_scanned = len(submissions)
@@ -107,10 +109,16 @@ def handle_comment(comment):
     message = f"{user.name} was first active in r/{sub.display_name} no later than {utc_to_human_readable(first_activity.created_utc)} [here](https://reddit.com{first_activity.permalink})." \
               f" In the past week, they have been active at a rate of {activity_per_day:.2f} comments per day." \
               f"\n\n_Note: Due to Reddit API limitations, the earliest activity seen by the bot might not be the actual earliest activity, but it provides an upper bound. Furthermore, the bot will underestimate comment activity for users who have made >1000 comments across Reddit in the past week. For this user, the bot scanned {comments_scanned} comments and {submissions_scanned} submissions._"
-    comment.reply(message)
+    
+    try:
+        comment.reply(message)
+        seen.add(comment.id)
+    except Exception as e:
+        print(f"Error while replying to comment: {e}")
+        return
+    
     print(message)
     print('-'*50)
-
     print(f"Replied to {comment.author.name} (reddit.com{comment.permalink})")
 
 
