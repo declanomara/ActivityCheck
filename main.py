@@ -88,6 +88,7 @@ def handle_comment(comment):
 
     except Exception as e:
         print(f"Error while fetching comments and submissions: {e}")
+        return
 
     comments_scanned = len(comments)
     submissions_scanned = len(submissions)
