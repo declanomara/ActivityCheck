@@ -124,11 +124,17 @@ def handle_comment(comment):
 
 if __name__ == "__main__":
     seen = load_seen()
+    print(f"Loaded {len(seen)} seen comments")
+
+    print("Logging in...", end = "")
     reddit = get_reddit()
+    print("Done")
+
     subreddit = "ucla"
     prompt = "!activitycheck"
 
     try:
+        print("Listening for prompt...")
         listen_for_prompt(reddit, prompt, handle_comment, subreddit)
     except KeyboardInterrupt:
         save_seen(seen)
